@@ -117,20 +117,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, setIsOpen }) => {
             </div>
             <button
               onClick={logout}
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-medium text-red-600 hover:text-red-700 bg-red-500/10 hover:bg-red-500/15 dark:text-red-400 dark:hover:text-red-300 dark:bg-red-500/5 dark:hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-medium text-amber-600 hover:text-amber-700 bg-amber-500/10 hover:bg-amber-500/15 dark:text-amber-400 dark:hover:text-amber-300 dark:bg-amber-500/5 dark:hover:bg-amber-500/10 rounded-lg transition-colors cursor-pointer"
+              title="Clears all local storage tasks/meals and reloads"
             >
-              <LogOut className="w-4 h-4" />
-              Sign Out
+              <LogOut className="w-4 h-4 rotate-180" />
+              Reset Session
             </button>
           </div>
         ) : (
           <div className="p-4 border-t border-card-border">
             <Link
-              href="/auth"
+              href="/"
               onClick={handleLinkClick}
               className="flex items-center justify-center w-full px-4 py-2.5 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 rounded-xl shadow-lg shadow-indigo-500/25 transition-all text-center"
             >
-              Get Started
+              Back to Home
             </Link>
           </div>
         )}

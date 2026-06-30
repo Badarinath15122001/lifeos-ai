@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { UserProfile, UserSettings } from "@/types";
-import { authService } from "@/services/firebase/auth";
 import { dbService } from "@/services/firebase/db";
 
 interface AppContextType {
@@ -21,8 +20,16 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+const mockUserProfile: UserProfile = {
+  uid: "portfolio-user",
+  email: "portfolio.user@lifeos.ai",
+  displayName: "LifeOS Portfolio Guest",
+  photoURL: "https://api.dicebear.com/7.x/adventurer/svg?seed=LifeOS",
+  createdAt: new Date().toISOString()
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user] = useState<UserProfile | null>(mockUserProfile);
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [settings, setSettings] = useState<UserSettings | null>(null);
@@ -41,36 +48,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
-  // Subscribe to authentication changes
+  // Fetch settings for mock user on mount
   useEffect(() => {
-    const unsubscribe = authService.subscribeToAuthChanges(async (authUser) => {
-      setUser(authUser);
-      if (authUser) {
-        // Fetch settings from Firestore or LocalStorage
-        try {
-          const userSettings = await dbService.getSettings(authUser.uid);
-          setSettings(userSettings);
-          
-          // Sync UI theme with saved settings if specified
-          if (userSettings.theme) {
-            setTheme(userSettings.theme);
-            const root = window.document.documentElement;
-            if (userSettings.theme === "dark") {
-              root.classList.add("dark");
-            } else {
-              root.classList.remove("dark");
-            }
+    const loadSettings = async () => {
+      try {
+        const userSettings = await dbService.getSettings(mockUserProfile.uid);
+        setSettings(userSettings);
+        
+        // Sync UI theme with saved settings if specified
+        if (userSettings.theme) {
+          setTheme(userSettings.theme);
+          const root = window.document.documentElement;
+          if (userSettings.theme === "dark") {
+            root.classList.add("dark");
+          } else {
+            root.classList.remove("dark");
           }
-        } catch (error) {
-          console.error("Failed to load user settings:", error);
         }
-      } else {
-        setSettings(null);
+      } catch (error) {
+        console.error("Failed to load user settings:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    };
+    
+    loadSettings();
   }, []);
 
   const toggleTheme = () => {
@@ -112,54 +114,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const loginWithGoogle = async () => {
-    setLoading(true);
-    try {
-      const authUser = await authService.signInWithGoogle();
-      setUser(authUser);
-    } catch (e) {
-      console.error(e);
-      throw e;
-    } finally {
-      setLoading(false);
-    }
+    // Permanently logged in as Guest
   };
 
-  const loginWithEmail = async (email: string, pass: string) => {
-    setLoading(true);
-    try {
-      const authUser = await authService.signInWithEmail(email, pass);
-      setUser(authUser);
-    } catch (e) {
-      console.error(e);
-      throw e;
-    } finally {
-      setLoading(false);
-    }
+  const loginWithEmail = async () => {
+    // Permanently logged in as Guest
   };
 
-  const registerWithEmail = async (email: string, pass: string) => {
-    setLoading(true);
-    try {
-      const authUser = await authService.signUpWithEmail(email, pass);
-      setUser(authUser);
-    } catch (e) {
-      console.error(e);
-      throw e;
-    } finally {
-      setLoading(false);
-    }
+  const registerWithEmail = async () => {
+    // Permanently logged in as Guest
   };
 
   const logout = async () => {
-    setLoading(true);
-    try {
-      await authService.signOutUser();
-      setUser(null);
-      setSettings(null);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
+    // Reset all local storage data for a clean portfolio test slate
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("lifeos_meals");
+      localStorage.removeItem("lifeos_quizzes");
+      localStorage.removeItem("lifeos_study_plans");
+      localStorage.removeItem("lifeos_study_sessions");
+      localStorage.removeItem("lifeos_tasks");
+      localStorage.removeItem("lifeos_reminders");
+      localStorage.removeItem("lifeos_chat_sessions");
+      localStorage.removeItem("lifeos_theme");
+      window.location.reload();
     }
   };
 

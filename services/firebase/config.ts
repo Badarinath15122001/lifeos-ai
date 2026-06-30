@@ -12,10 +12,8 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Check if we are running with mock keys
-export const isMockFirebase = 
-  !process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 
-  process.env.NEXT_PUBLIC_FIREBASE_API_KEY.includes("mock_api_key");
+// Enforce local-only data storage (LocalStorage) instead of Firebase Cloud
+export const isMockFirebase = true;
 
 let app;
 let auth: Auth | null = null;
