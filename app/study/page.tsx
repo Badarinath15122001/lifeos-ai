@@ -62,7 +62,7 @@ function StudyTutorContent() {
 
   // Active navigation tab on the right: 'chat' | 'flashcards' | 'plan'
   const [activeTab, setActiveTab] = useState<"chat" | "flashcards" | "plan">("chat");
-  const [topic, setTopic] = useState("Operating Systems");
+  const [topic, setTopic] = useState("");
   
   // Chat console states
   const [chatInput, setChatInput] = useState("");
@@ -276,6 +276,10 @@ function StudyTutorContent() {
 
   // Action helpers (Analogy, Mnemonics, Flashcards, Plan)
   const handleTriggerAction = async (action: "generate-analogy" | "generate-mnemonic") => {
+    if (!topic.trim()) {
+      alert("Please specify a study topic in the box at the top.");
+      return;
+    }
     setTutorLoading(true);
     try {
       const res = await fetch("/api/study-tutor", {
@@ -305,6 +309,10 @@ function StudyTutorContent() {
   };
 
   const handleGenerateFlashcards = async () => {
+    if (!topic.trim()) {
+      alert("Please specify a study topic in the box at the top.");
+      return;
+    }
     setCardsLoading(true);
     setIsFlipped(false);
     setCurrentCardIndex(0);
@@ -327,6 +335,10 @@ function StudyTutorContent() {
   };
 
   const handleGeneratePlan = async () => {
+    if (!topic.trim()) {
+      alert("Please specify a study topic in the box at the top.");
+      return;
+    }
     if (!examDate) {
       alert("Please select a target exam date.");
       return;
@@ -397,7 +409,8 @@ function StudyTutorContent() {
             type="text" 
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="text-xs font-bold bg-transparent outline-none border-none w-36 text-indigo-500 dark:text-indigo-400"
+            placeholder="e.g. Operating Systems"
+            className="text-xs font-bold bg-transparent outline-none border-none w-36 text-indigo-500 dark:text-indigo-400 placeholder:text-muted-text/50"
           />
         </div>
       </div>

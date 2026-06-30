@@ -23,7 +23,7 @@ export default function StudyQuiz() {
   const { user } = useApp();
 
   // Quiz setup states
-  const [topic, setTopic] = useState("Operating Systems");
+  const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const [questionCount, setQuestionCount] = useState("5");
   const [quizStarted, setQuizStarted] = useState(false);
@@ -55,6 +55,10 @@ export default function StudyQuiz() {
   }, [quizStarted, quizCompleted]);
 
   const handleStartQuiz = async () => {
+    if (!topic.trim()) {
+      alert("Please enter a subject topic.");
+      return;
+    }
     setLoading(true);
     setQuizCompleted(false);
     setTimeSpent(0);
