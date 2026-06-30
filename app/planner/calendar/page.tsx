@@ -11,8 +11,7 @@ import {
   Clock, 
   Plus, 
   CheckCircle, 
-  Circle,
-  HelpCircle
+  Circle
 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,21 +29,21 @@ export default function CalendarView() {
   const [quickCategory, setQuickCategory] = useState<"study" | "meal" | "workout" | "personal" | "work">("study");
   const [quickTime, setQuickTime] = useState("12:00");
 
-  useEffect(() => {
-    fetchTasks();
-  }, [user]);
-
   const fetchTasks = async () => {
     if (!user) return;
     try {
       const data = await dbService.getTasks(user.uid);
       setTasks(data);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => fetchTasks(), 0);
+  }, [user]);
 
   const handlePrevMonth = () => {
     setCurrentDate(prev => {
@@ -325,7 +324,7 @@ export default function CalendarView() {
                   <label className="font-semibold text-muted-text block mb-1">Category</label>
                   <select
                     value={quickCategory}
-                    onChange={(e) => setQuickCategory(e.target.value as any)}
+                    onChange={(e) => setQuickCategory(e.target.value as "study" | "workout" | "meal" | "work" | "personal")}
                     className="w-full glass-input bg-transparent dark:bg-slate-900"
                   >
                     <option value="study">Study</option>

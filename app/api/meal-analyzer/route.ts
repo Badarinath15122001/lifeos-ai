@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { FoodItem } from "@/types";
 
 // Smart local fallback for meal analysis (based on keyword parsing)
 function fallbackAnalyzeMeal(text?: string, hasImage?: boolean) {
   const description = text || "Uploaded Meal Photo";
   const lower = description.toLowerCase();
   
-  const foods: any[] = [];
+  const foods: FoodItem[] = [];
   let recommendations: string[] = ["Drink 250ml water with this meal.", "Consider adding some leafy greens for extra fiber."];
   let healthScore = 75;
   let fiber = 2;
   let sugar = 5;
-  let vitamins: string[] = ["Vitamin C"];
-  let minerals: string[] = ["Calcium"];
+  const vitamins: string[] = ["Vitamin C"];
+  const minerals: string[] = ["Calcium"];
 
   if (lower.includes("egg") || lower.includes("breakfast")) {
     foods.push({ name: "Boiled Eggs", calories: 156, protein: 13, carbs: 1.1, fat: 11, servingSize: "2 large eggs" });

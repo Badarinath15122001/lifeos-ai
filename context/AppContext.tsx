@@ -31,7 +31,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const savedTheme = localStorage.getItem("lifeos_theme") as "light" | "dark";
     const initialTheme = savedTheme || "dark";
-    setTheme(initialTheme);
+    setTimeout(() => setTheme(initialTheme), 0);
     
     const root = window.document.documentElement;
     if (initialTheme === "dark") {

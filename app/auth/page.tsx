@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import { Sparkles, Mail, Lock, ShieldAlert } from "lucide-react";
+import { Mail, Lock, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
 export default function Auth() {
   const router = useRouter();
-  const { user, loginWithGoogle, loginWithEmail, registerWithEmail, loading } = useApp();
+  const { user, loginWithGoogle, loginWithEmail, registerWithEmail } = useApp();
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
@@ -37,9 +37,10 @@ export default function Auth() {
         await loginWithEmail(email, password);
       }
       router.push("/meal");
-    } catch (e: any) {
-      console.error(e);
-      setErrorMsg(e.message || "Authentication failed. Please check credentials.");
+    } catch (error: unknown) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : "Authentication failed. Please check credentials.";
+      setErrorMsg(msg);
     } finally {
       setBtnLoading(false);
     }
@@ -51,9 +52,10 @@ export default function Auth() {
     try {
       await loginWithGoogle();
       router.push("/meal");
-    } catch (e: any) {
-      console.error(e);
-      setErrorMsg(e.message || "Google Sign-In failed.");
+    } catch (error: unknown) {
+      console.error(error);
+      const msg = error instanceof Error ? error.message : "Google Sign-In failed.";
+      setErrorMsg(msg);
     } finally {
       setBtnLoading(false);
     }

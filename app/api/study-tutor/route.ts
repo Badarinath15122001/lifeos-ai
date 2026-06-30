@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, Content } from "@google/generative-ai";
 
 // Smart study fallback generator
 function fallbackStudyTutor(action: string, topic: string, message?: string) {
@@ -137,9 +137,9 @@ export async function POST(req: NextRequest) {
       }
 
       // Build chat input
-      const contents: any[] = [{ role: "user", parts: [{ text: systemPrompt }] }];
+      const contents: Content[] = [{ role: "user", parts: [{ text: systemPrompt }] }];
       if (chatHistory && chatHistory.length > 0) {
-        chatHistory.forEach((h: any) => {
+        chatHistory.forEach((h: { role: string; content: string }) => {
           contents.push({
             role: h.role === "assistant" ? "model" : "user",
             parts: [{ text: h.content }]

@@ -14,7 +14,6 @@ import {
   BookMarked,
   Sparkles,
   ChevronRight,
-  TrendingUp,
   Brain
 } from "lucide-react";
 import Link from "next/link";
@@ -41,7 +40,7 @@ export default function StudyDashboard() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    setTimeout(() => setIsMounted(true), 0);
     const fetchStudyData = async () => {
       if (!user) return;
       try {

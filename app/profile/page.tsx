@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -6,7 +7,6 @@ import {
   User, 
   Target, 
   Flame, 
-  Activity, 
   BookOpen, 
   Save, 
   CheckCircle2,
@@ -29,11 +29,13 @@ export default function Profile() {
   // Sync state on load
   useEffect(() => {
     if (settings) {
-      setCalorieGoal(settings.dailyCalorieGoal.toString());
-      setProteinGoal(settings.dailyProteinGoal.toString());
-      setCarbsGoal(settings.dailyCarbsGoal.toString());
-      setFatGoal(settings.dailyFatGoal.toString());
-      setStudyGoal(settings.studyGoalMinutes.toString());
+      setTimeout(() => {
+        setCalorieGoal(settings.dailyCalorieGoal.toString());
+        setProteinGoal(settings.dailyProteinGoal.toString());
+        setCarbsGoal(settings.dailyCarbsGoal.toString());
+        setFatGoal(settings.dailyFatGoal.toString());
+        setStudyGoal(settings.studyGoalMinutes.toString());
+      }, 0);
     }
   }, [settings]);
 

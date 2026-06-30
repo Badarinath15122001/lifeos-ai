@@ -14,16 +14,13 @@ import {
   Plus, 
   Clock, 
   Activity, 
-  CheckCircle,
-  HelpCircle,
-  FileSpreadsheet
+  CheckCircle
 } from "lucide-react";
 import Link from "next/link";
 import { 
   BarChart, 
   Bar, 
   XAxis, 
-  YAxis, 
   Tooltip, 
   ResponsiveContainer 
 } from "recharts";
@@ -45,77 +42,18 @@ function PlannerContent() {
   const [time, setTime] = useState("12:00");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
   const [category, setCategory] = useState<"study" | "meal" | "workout" | "personal" | "work">("personal");
-  const [repeat, setRepeat] = useState<"none" | "daily" | "weekly">("none");
+  const [repeat] = useState<"none" | "daily" | "weekly">("none");
   const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-    fetchTasks();
-  }, [user]);
-
-  // Read message query param on mount (router agent redirect)
-  useEffect(() => {
-    const message = searchParams.get("message");
-    if (message) {
-      setNlpInput(message);
-      handleNlpSubmit(message, "extract-task");
-    }
-  }, [searchParams]);
 
   const fetchTasks = async () => {
     if (!user) return;
     try {
       const data = await dbService.getTasks(user.uid);
       setTasks(data);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreateTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !user) return;
-
-    try {
-      const newTask: Task = {
-        id: `task-${Date.now()}`,
-        userId: user.uid,
-        title: title.trim(),
-        date,
-        time: time || undefined,
-        priority,
-        category,
-        completed: false,
-        repeat
-      };
-
-      await dbService.saveTask(newTask);
-      setTasks(prev => [...prev, newTask]);
-      setTitle("");
-    } catch (e) {
-      console.error(e);
-      alert("Failed to save task.");
-    }
-  };
-
-  const handleToggleComplete = async (task: Task) => {
-    try {
-      const updated = { ...task, completed: !task.completed };
-      await dbService.saveTask(updated);
-      setTasks(prev => prev.map(t => t.id === task.id ? updated : t));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleDeleteTask = async (id: string) => {
-    try {
-      await dbService.deleteTask(id);
-      setTasks(prev => prev.filter(t => t.id !== id));
-    } catch (e) {
-      console.error(e);
     }
   };
 
@@ -163,7 +101,7 @@ function PlannerContent() {
         
         for (const item of scheduled) {
           const newTask: Task = {
-            id: `task-sch-${Math.random().toString(36).substr(2, 9)}`,
+            id: `task-sch-${Math.random().toString(36).substring(2, 11)}`,
             userId: user.uid,
             title: item.title,
             date: item.date,
@@ -181,13 +119,76 @@ function PlannerContent() {
         setNlpInput("");
         alert(`AI has scheduled ${tasksCreated.length} non-overlapping tasks avoiding work/sleep hours!`);
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       alert("Failed to process natural language scheduler request.");
     } finally {
       setNlpLoading(false);
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => setIsMounted(true), 0);
+    setTimeout(() => fetchTasks(), 0);
+  }, [user]);
+
+  // Read message query param on mount (router agent redirect)
+  useEffect(() => {
+    const message = searchParams.get("message");
+    if (message) {
+      setTimeout(() => {
+        setNlpInput(message);
+        handleNlpSubmit(message, "extract-task");
+      }, 0);
+    }
+  }, [searchParams]);
+
+  const handleCreateTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !user) return;
+
+    try {
+      const newTask: Task = {
+        id: `task-${Date.now()}`,
+        userId: user.uid,
+        title: title.trim(),
+        date,
+        time: time || undefined,
+        priority,
+        category,
+        completed: false,
+        repeat
+      };
+
+      await dbService.saveTask(newTask);
+      setTasks(prev => [...prev, newTask]);
+      setTitle("");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to save task.");
+    }
+  };
+
+  const handleToggleComplete = async (task: Task) => {
+    try {
+      const updated = { ...task, completed: !task.completed };
+      await dbService.saveTask(updated);
+      setTasks(prev => prev.map(t => t.id === task.id ? updated : t));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await dbService.deleteTask(id);
+      setTasks(prev => prev.filter(t => t.id !== id));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+
 
   // Calculations for charts & statistics
   const todoTasks = tasks.filter(t => !t.completed);
@@ -448,7 +449,7 @@ function PlannerContent() {
                   <label className="font-semibold text-muted-text block mb-1">Priority</label>
                   <select
                     value={priority}
-                    onChange={(e) => setPriority(e.target.value as any)}
+                    onChange={(e) => setPriority(e.target.value as "low" | "medium" | "high")}
                     className="w-full glass-input bg-transparent dark:bg-slate-900"
                   >
                     <option value="low">Low</option>
@@ -460,7 +461,7 @@ function PlannerContent() {
                   <label className="font-semibold text-muted-text block mb-1">Category</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value as "study" | "workout" | "meal" | "work" | "personal")}
                     className="w-full glass-input bg-transparent dark:bg-slate-900"
                   >
                     <option value="study">Study</option>

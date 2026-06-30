@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -11,8 +12,6 @@ import {
   TrendingUp, 
   Sparkles, 
   Plus, 
-  ChevronRight,
-  TrendingDown,
   Info,
   Activity
 } from "lucide-react";
@@ -36,7 +35,7 @@ export default function MealHistory() {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    setTimeout(() => setIsMounted(true), 0);
     const fetchHistory = async () => {
       if (!user) return;
       try {
@@ -178,7 +177,7 @@ export default function MealHistory() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Calories tracker */}
             <div className="glass-card rounded-2xl p-5 flex flex-col justify-between">
-              <span className="text-[10px] text-muted-text font-bold block uppercase tracking-wider">Today's Intake</span>
+              <span className="text-[10px] text-muted-text font-bold block uppercase tracking-wider">Today&apos;s Intake</span>
               <div className="my-2.5">
                 <span className="text-2xl font-extrabold">{todayTotals.calories}</span>
                 <span className="text-xs text-muted-text"> / {settings?.dailyCalorieGoal || 2000} kcal</span>

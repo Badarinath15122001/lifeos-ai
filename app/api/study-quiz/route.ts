@@ -101,7 +101,7 @@ function fallbackGenerateQuiz(topic: string, difficulty: string, count: number) 
 
 export async function POST(req: NextRequest) {
   try {
-    const { topic, difficulty, questionCount, questionType } = await req.json();
+    const { topic, difficulty, questionCount } = await req.json();
     const apiKey = process.env.GEMINI_API_KEY;
 
     const count = parseInt(questionCount) || 5;

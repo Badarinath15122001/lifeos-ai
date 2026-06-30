@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { dbService } from "@/services/firebase/db";
-import { Quiz, QuizQuestion } from "@/types";
+import { Quiz } from "@/types";
 import { 
   Trophy, 
   HelpCircle, 
@@ -17,7 +18,6 @@ import {
   ListOrdered,
   Flame
 } from "lucide-react";
-import Link from "next/link";
 
 export default function StudyQuiz() {
   const { user } = useApp();
@@ -213,7 +213,7 @@ export default function StudyQuiz() {
                       <label className="text-xs font-semibold text-muted-text block mb-1">Difficulty</label>
                       <select
                         value={difficulty}
-                        onChange={(e) => setDifficulty(e.target.value as any)}
+                        onChange={(e) => setDifficulty(e.target.value as "easy" | "medium" | "hard")}
                         className="w-full text-sm glass-input bg-transparent dark:bg-slate-950"
                       >
                         <option value="easy">Easy (Foundational)</option>

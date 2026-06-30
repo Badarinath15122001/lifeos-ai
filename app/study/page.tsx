@@ -5,17 +5,15 @@ import { useSearchParams } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { dbService } from "@/services/firebase/db";
 import { ChatMessage, StudyPlan, StudySession } from "@/types";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   BookOpen, 
   Timer, 
-  Sparkles, 
   HelpCircle, 
   Play, 
   Pause, 
   RotateCcw, 
-  Flame,
-  ChevronLeft,
+  ChevronLeft, 
   ChevronRight,
   Save,
   CheckCircle,
@@ -28,7 +26,8 @@ import {
 function playChime() {
   if (typeof window === "undefined") return;
   try {
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || 
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
     
@@ -97,123 +96,6 @@ function StudyTutorContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Read message query param on mount (router agent redirect)
-  useEffect(() => {
-    const message = searchParams.get("message");
-    if (message) {
-      setChatInput(message);
-      // Guess topic from the message if possible
-      const lower = message.toLowerCase();
-      if (lower.includes("operating system") || lower.includes("os")) setTopic("Operating Systems");
-      else if (lower.includes("react") || lower.includes("js") || lower.includes("typescript")) setTopic("Web Development");
-      
-      // Auto run first query
-      handleSendChat(message);
-    } else {
-      // Welcome message from AI Tutor
-      setMessages([
-        { 
-          id: "welcome", 
-          role: "assistant", 
-          content: "Hello! I am your **Study Tutor AI**. I can explain complex topics, build flashcards, write analogies, or schedule custom study plans. What are we studying today?", 
-          timestamp: new Date().toISOString() 
-        }
-      ]);
-    }
-  }, [searchParams]);
-
-  // Pomodoro Ticking Logic
-  useEffect(() => {
-    if (timerActive) {
-      timerIntervalRef.current = setInterval(() => {
-        setTimerSeconds(prev => {
-          if (prev <= 1) {
-            handleTimerComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    }
-
-    return () => {
-      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-    };
-  }, [timerActive, pomodoroMode]);
-
-  const handleTimerComplete = async () => {
-    setTimerActive(false);
-    playChime();
-    
-    const minutesCompleted = Math.round(totalTimerDuration / 60);
-    
-    // Log study session if user is logged in
-    if (user && pomodoroMode === "focus") {
-      try {
-        const session: StudySession = {
-          id: `session-${Date.now()}`,
-          userId: user.uid,
-          topic: topic,
-          durationMinutes: minutesCompleted,
-          timestamp: new Date().toISOString(),
-          notes: `Pomodoro Focus Block completed on ${topic}`
-        };
-        await dbService.saveStudySession(session);
-        alert(`Focus block completed! Saved ${minutesCompleted} focus minutes for ${topic}. Take a break!`);
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      alert(`Timer finished: ${pomodoroMode === "focus" ? "Focus session complete!" : "Break complete! Ready to lock back in?"}`);
-    }
-
-    // Auto toggle to break / focus
-    if (pomodoroMode === "focus") {
-      setPomodoroMode("shortBreak");
-      setTimerSeconds(300); // 5 minutes
-      setTotalTimerDuration(300);
-    } else {
-      setPomodoroMode("focus");
-      setTimerSeconds(1500); // 25 minutes
-      setTotalTimerDuration(1500);
-    }
-  };
-
-  const handleTimerReset = () => {
-    setTimerActive(false);
-    if (pomodoroMode === "focus") {
-      setTimerSeconds(1500);
-      setTotalTimerDuration(1500);
-    } else if (pomodoroMode === "shortBreak") {
-      setTimerSeconds(300);
-      setTotalTimerDuration(300);
-    } else {
-      setTimerSeconds(900);
-      setTotalTimerDuration(900);
-    }
-  };
-
-  const handleCustomTimerSet = () => {
-    const mins = parseInt(customMinutes);
-    if (isNaN(mins) || mins <= 0 || mins > 180) {
-      alert("Please enter a valid duration between 1 and 180 minutes.");
-      return;
-    }
-    setTimerActive(false);
-    setTimerSeconds(mins * 60);
-    setTotalTimerDuration(mins * 60);
-    setPomodoroMode("focus");
-  };
-
-  // Format seconds to MM:SS
-  const formatTime = (sec: number) => {
-    const m = Math.floor(sec / 60).toString().padStart(2, "0");
-    const s = (sec % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
-
   // Chat Submissions
   const handleSendChat = async (textToSend: string) => {
     const query = textToSend || chatInput;
@@ -253,8 +135,8 @@ function StudyTutorContent() {
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       setMessages(prev => [
         ...prev,
         {
@@ -268,6 +150,129 @@ function StudyTutorContent() {
       setTutorLoading(false);
     }
   };
+
+  // Read message query param on mount (router agent redirect)
+  useEffect(() => {
+    const message = searchParams.get("message");
+    if (message) {
+      setTimeout(() => {
+        setChatInput(message);
+        // Guess topic from the message if possible
+        const lower = message.toLowerCase();
+        if (lower.includes("operating system") || lower.includes("os")) setTopic("Operating Systems");
+        else if (lower.includes("react") || lower.includes("js") || lower.includes("typescript")) setTopic("Web Development");
+        
+        // Auto run first query
+        handleSendChat(message);
+      }, 0);
+    } else {
+      // Welcome message from AI Tutor
+      setTimeout(() => {
+        setMessages([
+          { 
+            id: "welcome", 
+            role: "assistant", 
+            content: "Hello! I am your **Study Tutor AI**. I can explain complex topics, build flashcards, write analogies, or schedule custom study plans. What are we studying today?", 
+            timestamp: new Date().toISOString() 
+          }
+        ]);
+      }, 0);
+    }
+  }, [searchParams]);
+
+  const handleTimerComplete = async () => {
+    setTimerActive(false);
+    playChime();
+    
+    const minutesCompleted = Math.round(totalTimerDuration / 60);
+    
+    // Log study session if user is logged in
+    if (user && pomodoroMode === "focus") {
+      try {
+        const session: StudySession = {
+          id: `session-${Date.now()}`,
+          userId: user.uid,
+          topic: topic,
+          durationMinutes: minutesCompleted,
+          timestamp: new Date().toISOString(),
+          notes: `Pomodoro Focus Block completed on ${topic}`
+        };
+        await dbService.saveStudySession(session);
+        alert(`Focus block completed! Saved ${minutesCompleted} focus minutes for ${topic}. Take a break!`);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      alert(`Timer finished: ${pomodoroMode === "focus" ? "Focus session complete!" : "Break complete! Ready to lock back in?"}`);
+    }
+
+    // Auto toggle to break / focus
+    if (pomodoroMode === "focus") {
+      setPomodoroMode("shortBreak");
+      setTimerSeconds(300); // 5 minutes
+      setTotalTimerDuration(300);
+    } else {
+      setPomodoroMode("focus");
+      setTimerSeconds(1500); // 25 minutes
+      setTotalTimerDuration(1500);
+    }
+  };
+
+  // Pomodoro Ticking Logic
+  useEffect(() => {
+    if (timerActive) {
+      timerIntervalRef.current = setInterval(() => {
+        setTimerSeconds(prev => {
+          if (prev <= 1) {
+            handleTimerComplete();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    }
+
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [timerActive, pomodoroMode]);
+
+  const handleTimerReset = () => {
+    setTimerActive(false);
+    if (pomodoroMode === "focus") {
+      setTimerSeconds(1500);
+      setTotalTimerDuration(1500);
+    } else if (pomodoroMode === "shortBreak") {
+      setTimerSeconds(300);
+      setTotalTimerDuration(300);
+    } else {
+      setTimerSeconds(900);
+      setTotalTimerDuration(900);
+    }
+  };
+
+  const handleCustomTimerSet = () => {
+    const mins = parseInt(customMinutes);
+    if (isNaN(mins) || mins <= 0 || mins > 180) {
+      alert("Please enter a valid duration between 1 and 180 minutes.");
+      return;
+    }
+    setTimerActive(false);
+    setTimerSeconds(mins * 60);
+    setTotalTimerDuration(mins * 60);
+    setPomodoroMode("focus");
+  };
+
+  // Format seconds to MM:SS
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, "0");
+    const s = (sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
+
 
   // Action helpers (Analogy, Mnemonics, Flashcards, Plan)
   const handleTriggerAction = async (action: "generate-analogy" | "generate-mnemonic") => {
@@ -368,8 +373,7 @@ function StudyTutorContent() {
     }
   };
 
-  // Timer Circle stroke math
-  const timerCircleProgress = (timerSeconds / totalTimerDuration) * 283;
+
 
   return (
     <div className="space-y-6">
@@ -539,7 +543,7 @@ function StudyTutorContent() {
                   <label className="text-[10px] font-bold text-muted-text uppercase block mb-1">Difficulty</label>
                   <select 
                     value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value as any)}
+                    onChange={(e) => setDifficulty(e.target.value as "easy" | "medium" | "hard")}
                     className="w-full text-xs p-2.5 border border-card-border rounded-xl bg-transparent font-semibold dark:bg-slate-900"
                   >
                     <option value="easy">Easy</option>
@@ -650,7 +654,7 @@ function StudyTutorContent() {
                         {/* Render simple markdown bold segments */}
                         {msg.content.split("\n").map((paragraph, pIdx) => {
                           // Simple bold helper
-                          let rendered = paragraph;
+                          const rendered = paragraph;
                           const boldRegex = /\*\*(.*?)\*\*/g;
                           const matches = Array.from(rendered.matchAll(boldRegex));
                           

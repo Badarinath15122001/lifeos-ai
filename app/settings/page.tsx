@@ -6,8 +6,6 @@ import {
   Settings as SettingsIcon, 
   Moon, 
   Sun, 
-  Bell, 
-  Volume2, 
   Database, 
   Trash2, 
   RefreshCw,
@@ -29,13 +27,6 @@ export default function SettingsPage() {
     tasks: 0
   });
 
-  useEffect(() => {
-    if (settings) {
-      setNotifications(settings.notificationsEnabled);
-    }
-    loadDiagnostics();
-  }, [settings]);
-
   const loadDiagnostics = () => {
     if (typeof window === "undefined") return;
     const meals = JSON.parse(localStorage.getItem("lifeos_meals") || "[]").length;
@@ -45,6 +36,13 @@ export default function SettingsPage() {
     
     setCounts({ meals, quizzes, plans, tasks });
   };
+
+  useEffect(() => {
+    if (settings) {
+      setTimeout(() => setNotifications(settings.notificationsEnabled), 0);
+    }
+    setTimeout(() => loadDiagnostics(), 0);
+  }, [settings]);
 
   const handleToggleNotifications = async () => {
     const val = !notifications;

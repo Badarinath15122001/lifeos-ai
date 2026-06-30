@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
@@ -7,7 +8,6 @@ import { dbService } from "@/services/firebase/db";
 import { MealLog, FoodItem } from "@/types";
 import { 
   ChefHat, 
-  Upload, 
   Flame, 
   Target, 
   Heart, 
@@ -54,16 +54,6 @@ function MealAnalyzerContent() {
     fat: settings?.dailyFatGoal || 70,
   };
 
-  useEffect(() => {
-    setIsMounted(true);
-    // Auto-fill and auto-run if message query param is present
-    const message = searchParams.get("message");
-    if (message) {
-      setTextDescription(message);
-      handleAnalyze(message, null);
-    }
-  }, [searchParams]);
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -104,7 +94,11 @@ function MealAnalyzerContent() {
     setSaveSuccess(false);
 
     try {
-      let payload: any = {
+      const payload: {
+        textDescription: string;
+        image?: string;
+        mimeType?: string;
+      } = {
         textDescription: queryText,
       };
 
@@ -123,13 +117,25 @@ function MealAnalyzerContent() {
       if (!response.ok) throw new Error("Analysis failed");
       const data = await response.json();
       setAnalysisResult(data);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
       alert("Failed to analyze meal. Please check your network and try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setTimeout(() => setIsMounted(true), 0);
+    // Auto-fill and auto-run if message query param is present
+    const message = searchParams.get("message");
+    if (message) {
+      setTimeout(() => {
+        setTextDescription(message);
+        handleAnalyze(message, null);
+      }, 0);
+    }
+  }, [searchParams]);
 
   const handleSaveMeal = async () => {
     if (!analysisResult || !user) return;
@@ -180,10 +186,6 @@ function MealAnalyzerContent() {
     name: food.name,
     calories: food.calories
   })) || [];
-
-  const caloriePercentage = analysisResult?.calories 
-    ? Math.min(Math.round((analysisResult.calories / targets.calories) * 100), 100) 
-    : 0;
 
   return (
     <div className="space-y-6">
