@@ -19,6 +19,9 @@ const getMockUser = (): UserProfile | null => {
   return data ? JSON.parse(data) : null;
 };
 
+// Subscriber registry for mock authentication changes
+let mockSubscribers: ((user: UserProfile | null) => void)[] = [];
+
 const setMockUser = (user: UserProfile | null): void => {
   if (typeof window === 'undefined') return;
   if (user) {
@@ -26,6 +29,8 @@ const setMockUser = (user: UserProfile | null): void => {
   } else {
     localStorage.removeItem("lifeos_mock_user");
   }
+  // Notify all registered subscribers of the change
+  mockSubscribers.forEach((callback) => callback(user));
 };
 
 export const authService = {
@@ -105,10 +110,6 @@ export const authService = {
   signOutUser: async (): Promise<void> => {
     if (!isAuthActive()) {
       setMockUser(null);
-      // Trigger a reload or state refresh
-      if (typeof window !== "undefined") {
-        window.location.reload();
-      }
       return;
     }
     await signOut(auth);
@@ -116,12 +117,14 @@ export const authService = {
 
   subscribeToAuthChanges: (callback: (user: UserProfile | null) => void): (() => void) => {
     if (!isAuthActive()) {
-      // Simulate connection trigger in mock mode
-      const mockUser = getMockUser();
-      callback(mockUser);
+      mockSubscribers.push(callback);
+      // Immediately report the initial state
+      callback(getMockUser());
       
-      // Return dummy unsubscribing function
-      return () => {};
+      // Return unsubscribe cleanup function
+      return () => {
+        mockSubscribers = mockSubscribers.filter((cb) => cb !== callback);
+      };
     }
 
     const unsubscribe = onAuthStateChanged(auth, (user: FirebaseUser | null) => {
