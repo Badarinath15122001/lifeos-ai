@@ -1,4 +1,4 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, HttpsError, CallableRequest } from "firebase-functions/v2/https";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as admin from "firebase-admin";
 
@@ -20,7 +20,7 @@ const getApiKey = () => {
  * 1. Router Agent
  * Classifies input message to 'meal', 'study', or 'planner'
  */
-export const routerAgent = onCall({ maxInstances: 10 }, async (request) => {
+export const routerAgent = onCall({ maxInstances: 10 }, async (request: CallableRequest) => {
   // Authentication check
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "User must be authenticated.");
@@ -67,7 +67,7 @@ export const routerAgent = onCall({ maxInstances: 10 }, async (request) => {
  * 2. Meal Analyzer Agent
  * Extracts nutrition data from food logs (supports text and vision)
  */
-export const analyzeMeal = onCall({ maxInstances: 10 }, async (request) => {
+export const analyzeMeal = onCall({ maxInstances: 10 }, async (request: CallableRequest) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "User must be authenticated.");
   }
@@ -124,7 +124,7 @@ export const analyzeMeal = onCall({ maxInstances: 10 }, async (request) => {
  * 3. Study Tutor Agent
  * General educational tutor (explaining concepts, analogies, mnemonics)
  */
-export const studyTutor = onCall({ maxInstances: 10 }, async (request) => {
+export const studyTutor = onCall({ maxInstances: 10 }, async (request: CallableRequest) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "User must be authenticated.");
   }
@@ -153,7 +153,7 @@ export const studyTutor = onCall({ maxInstances: 10 }, async (request) => {
  * 4. Study Quiz Generator
  * Generates custom quizzes
  */
-export const studyQuiz = onCall({ maxInstances: 10 }, async (request) => {
+export const studyQuiz = onCall({ maxInstances: 10 }, async (request: CallableRequest) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "User must be authenticated.");
   }
@@ -198,7 +198,7 @@ export const studyQuiz = onCall({ maxInstances: 10 }, async (request) => {
  * 5. Planner Agent
  * Extracts tasks / Auto schedules
  */
-export const plannerAgent = onCall({ maxInstances: 10 }, async (request) => {
+export const plannerAgent = onCall({ maxInstances: 10 }, async (request: CallableRequest) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "User must be authenticated.");
   }
