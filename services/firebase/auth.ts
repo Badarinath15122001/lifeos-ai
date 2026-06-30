@@ -48,7 +48,7 @@ export const authService = {
     }
 
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(auth!, provider);
     const user = result.user;
     return {
       uid: user.uid,
@@ -72,7 +72,7 @@ export const authService = {
       return mockUser;
     }
 
-    const result = await signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithEmailAndPassword(auth!, email, password);
     const user = result.user;
     return {
       uid: user.uid,
@@ -96,7 +96,7 @@ export const authService = {
       return mockUser;
     }
 
-    const result = await createUserWithEmailAndPassword(auth, email, password);
+    const result = await createUserWithEmailAndPassword(auth!, email, password);
     const user = result.user;
     return {
       uid: user.uid,
@@ -112,7 +112,7 @@ export const authService = {
       setMockUser(null);
       return;
     }
-    await signOut(auth);
+    await signOut(auth!);
   },
 
   subscribeToAuthChanges: (callback: (user: UserProfile | null) => void): (() => void) => {
@@ -127,7 +127,7 @@ export const authService = {
       };
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user: FirebaseUser | null) => {
+    const unsubscribe = onAuthStateChanged(auth!, (user: FirebaseUser | null) => {
       if (user) {
         callback({
           uid: user.uid,
